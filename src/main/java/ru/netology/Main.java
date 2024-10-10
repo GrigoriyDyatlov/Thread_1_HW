@@ -3,19 +3,17 @@ package ru.netology;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 public class Main {
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, ExecutionException {
         String[] texts = new String[25];
         for (int i = 0; i < texts.length; i++) {
             texts[i] = generateText("aab", 30_000);
         }
 
 final ExecutorService threadPoll = Executors.newFixedThreadPool(5);
+        List<Future> list = new ArrayList<>();
 
         long startTs = System.currentTimeMillis(); // start time
         for (String text : texts) {
@@ -41,10 +39,15 @@ final ExecutorService threadPoll = Executors.newFixedThreadPool(5);
             }
             return text.substring(0, 100) + " -> " + maxSize;
         };
-            final Future<String> task = threadPoll.submit(logic);
+            final Future<String> future = threadPoll.submit(logic);
+            list.add(future);
+
 
         }
-        for(Future<String> future : threadPoll)
+        for(Future<String> future : list){
+            System.out.println(future.get());
+        }
+            threadPoll.shutdown();
         long endTs = System.currentTimeMillis(); // end time
 
         System.out.println("Time: " + (endTs - startTs) + "ms");
